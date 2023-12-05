@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,7 +29,8 @@ import javax.swing.JTextArea;
  *
  * 4) List all the words in alphabetical order
  * 
- * 5) Write the count for each word, e.g. "word word pippo" should output "pippo -> 1 word -> 2"
+ * 5) Write the count for each word, e.g. "word word pippo" should output "pippo
+ * -> 1 word -> 2"
  *
  */
 public final class LambdaFilter extends JFrame {
@@ -38,7 +41,20 @@ public final class LambdaFilter extends JFrame {
         /**
          * Commands.
          */
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()),
+        LOWERCASE("Convert string to lowercase", String::toLowerCase),
+        COUNTCHAR("Count the number of chars", x -> String.valueOf(x.length())),
+        COUNTLINES("Count the number of lines", x -> String.valueOf(x.lines().count())),
+        LISTALPHWORDS("List all the words in alphabetical order",
+                x -> Arrays.stream(x.split("(\\s|\\p{Punct})+"))
+                        .sorted()
+                        .collect(Collectors.joining("\n"))),
+        COUNTWORDS("Count the number of each word",
+                x -> Arrays.stream(x.split("(\\s|\\p{Punct})+"))
+                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                        .entrySet().stream()
+                        .map(e -> e.getKey() + " -> " + e.getValue())
+                        .collect(Collectors.joining("\n")));
 
         private final String commandName;
         private final Function<String, String> fun;
